@@ -1,0 +1,78 @@
+﻿@page "/article/{Id}"
+@inject HttpClient Http
+@using Models
+
+@using Markdig
+@using Serilog
+
+@inject MarkdownPipeline Pipeline
+@*<div>
+        <strong>Article ID: @Id.Substring(0, 10)</strong>
+    </div>*@
+
+    <div class="container slide-left-animated">
+        @if (blog == null)
+        {
+            @*<p><em>Loading...</em></p>*@
+            <p><i class="fa fa-spinner" aria-hidden="true"></i></p>
+        }
+        else
+        {
+            <NavLink class="nav-link" href="blog">
+                <span class="oi oi-arrow-thick-left" aria-hidden="true">Back to Blog</span>
+            </NavLink>
+
+            <div>
+                <h4>@blog.Title</h4>
+            </div>
+            @*<div>
+                <p>@blog.Markdown</p>
+            </div>*@
+
+            <div class="row" style="height: 600px;">
+                @*<div class="col-6 h-100">
+                    <textarea class="form-control h-100" @bind-value=@blog.Markdown @bind-value:event="oninput"></textarea>
+                </div>*@
+                <div class="card col-sm-12">
+                    @((MarkupString)HtmlToRender)
+                </div>
+            </div>
+
+        }
+    </div>
+
+@code {
+
+    [Parameter]
+    public string Id { get; set; }
+
+    private string url;
+    Blogg blog;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        url = ApiHelper.apiBlog + Id;
+        blog = await Http.GetFromJsonAsync<Blogg>(url);
+    }
+
+    private string _html = string.Empty;
+    public string HtmlToRender
+    {
+        get
+        {
+            try
+            {
+                _html = Markdown.ToHtml(blog.Markdown ?? string.Empty, Pipeline);
+                return _html;
+            }
+            catch (NullReferenceException nrx)
+            {
+                Log.Error(nrx, "Couldn't render markdown text");
+            }
+
+            return _html;
+        }
+    }
+
+}

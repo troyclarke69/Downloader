@@ -1,0 +1,90 @@
+﻿@page "/contact"
+@using Blazored.FluentValidation
+@inject HttpClient Http
+@layout PrimaryLayout
+@using Serilog
+
+<div class="container fade-up">
+    <h3>Contact Me</h3>
+
+    <EditForm Model="BlogPostModel" OnValidSubmit="HandleValidSubmit">
+
+        <FluentValidationValidator />
+
+        <div class="row mt-4">
+            <div class="col">
+                <label for="firstName">First Name</label>
+                <InputText id="firstName" @bind-Value="BlogPostModel.FirstName" class="form-control" />
+            </div>
+            <div class="col">
+                <label for="lastName">Last Name</label>
+                <InputText id="lastName" @bind-Value="BlogPostModel.LastName" class="form-control" />
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col">
+                <label for="email">Email</label>
+                <InputText id="email" @bind-Value="BlogPostModel.Email" class="form-control" />
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col">
+                <label for="company">Company</label>
+                <InputText id="company" @bind-Value="BlogPostModel.Company" class="form-control" />
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col">
+                <label for="message">Message</label>
+                <InputTextArea @bind-Value="BlogPostModel.Message" class="form-control" rows="6" />
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <button type="submit" class="btn btn-primary">Send</button>
+        </div>
+        <div class="row mt-4">
+            <ValidationSummary />
+        </div>
+        <div class="message">
+            <h3>@Message</h3>
+        </div>
+
+    </EditForm>
+</div>
+
+@code {
+
+    private string Message = String.Empty;
+
+    protected BlogPost BlogPostModel { get; set; } = new BlogPost();
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            Message = "Sending message ...";
+
+            var response = await Http.PostAsJsonAsync(ApiHelper.apiSendMessage, BlogPostModel);
+            if (response.StatusCode == System.Net.HttpStatusCode.Created)
+            {
+                Message = "Thanks for your message!";
+            }
+
+            BlogPostModel.Company = String.Empty;
+            BlogPostModel.FirstName = String.Empty;
+            BlogPostModel.LastName = String.Empty;
+            BlogPostModel.Email = String.Empty;
+            BlogPostModel.Message = String.Empty;
+
+        }
+        catch (Exception e)
+        {
+            Message = "Oops! Something went wrong. (" + e.Message + ") " +
+                    "Alternatively, email me at teclarke@rogers.com. Thanks!";
+        }
+    }
+}

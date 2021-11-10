@@ -1,0 +1,100 @@
+﻿@page "/projects"
+@inject HttpClient Http
+@layout PrimaryLayout
+@using Serilog
+@using Models
+
+    <div class="container fade-up">
+        <h3>Projects</h3>
+    </div>
+
+        @if (projects == null)
+        {
+            <p><i class="fa fa-spinner" aria-hidden="true"></i></p>
+        }
+        else
+        {
+            @foreach (var p in projects)
+            {
+                <div class="card card-padding slide-left-animated">
+                    <a href=@p.Url target="_blank" title=@p.Url>
+                        <img src=@p.Image class="card-img-top" alt=@p.Name>
+                    </a>
+
+                    <div class="card-body">
+
+                        <p style="letter-spacing: 3px; color: orangered; font-weight: bold; font-size: 1.5rem">
+                            @p.Slug
+                        </p>
+                        <p style="font-stretch: extra-expanded">@p.Tag</p>
+                        @*<h6 class="card-text">@p.Platform</h6>*@
+                        <p style="font-size: .75rem; color: navy">@p.Description</p>
+
+                        @if (p.Blog[0].ToString().Trim() != "")
+                        {
+                            <p></p>
+                            @*<a href="/notes/@p.Blog[0]" class="btn btn-danger">Dev Notes</a>*@
+                            <a href="/notes/@p.Blog[0]" style="text-decoration: underline;
+                                font-size: small">Dev Notes</a>
+                            @*<a href=@p.Git style="text-decoration: underline; font-size:small">Source Code</a>*@
+                        }
+
+                        @if (p.Git.ToString().Trim() != "") 
+                        {
+                            <p></p>
+                            <a href=@p.Git style="text-decoration: underline; font-size:small">Source Code</a>
+                        }
+                    </div>
+                </div>
+                <p></p>
+            }
+        }
+    @*</div>*@
+
+@code {
+    private Project[] projects;
+    private Geo geo;
+    private string geoStr;
+    private string country_code;
+
+    protected override async Task OnInitializedAsync()
+    {
+        projects = await Http.GetFromJsonAsync<Project[]>(ApiHelper.apiProjects);
+        //Log.Information("Projects loaded successfully");
+
+        // Http returns: text/html; charset=UTF-8
+        geoStr = await Http.GetStringAsync(ApiHelper.apiGeo);
+
+        // Serialize into JSON string
+        string jsonstr = JsonConvert.SerializeObject(geoStr, Formatting.Indented);
+
+        // Deserialize to the GEO Object
+        Geo deserializedGeo = JsonConvert.DeserializeObject<Geo>(geoStr);
+
+        // update geo.url
+        deserializedGeo.url = "projects";
+
+        try
+        {
+            var response = await Http.PostAsJsonAsync(ApiHelper.apiPostTraffic, deserializedGeo);
+
+            //Log.Information(response.StatusCode.ToString());
+
+            // Why returning 200=OK here, but 201=CREATED in apiSendMail ??
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                Log.Information("Traffic posted successfully. " + deserializedGeo.url);
+            }
+            else
+            {
+                Log.Information("Traffic was not posted." + response.StatusCode);
+            }
+        }
+        catch (Exception e)
+        {
+            Log.Information("Error posting traffic. " + e.Message);
+            return;
+        }
+
+    }
+}

@@ -1,0 +1,59 @@
+﻿.svg-wrapper {
+    height: 20px;
+/*    margin: 0 auto;*/
+/*    margin: 20px;*/
+/*    position: relative;*/
+    top: 25%;
+    transform: translateY(-30%);
+    width: 320px;
+}
+
+a {
+    text-decoration: none;
+}
+
+.shape {
+    fill: transparent;
+/*    stroke-dasharray: 140 540;*/
+    stroke-dasharray: 210 540;
+    stroke-dashoffset: -474;
+    /*    stroke-width: 8px;*/
+    stroke-width: 1px;
+    stroke: #19f6e8;
+    stroke: #333ccc;
+}
+
+.text {
+    color: #fff;
+    color: #999;
+    font-family: 'Roboto Condensed';
+    font-size: 22px;
+/*    letter-spacing: 8px;*/
+    letter-spacing: 1.5px;
+    line-height: 32px;
+    position: relative;
+    top: -48px;
+/*    text-align: center;*/
+}
+
+@keyframes draw {
+    0% {
+        /*        stroke-dasharray: 140 540;*/
+        stroke-dasharray: 0 540;
+        /*        stroke-dashoffset: -474;*/
+        stroke-dashoffset: -47;
+/*        stroke-width: 8px;*/
+        stroke-width: 1px;
+    }
+
+    100% {
+        stroke-dasharray: 760;
+        stroke-dashoffset: 0;
+        stroke-width: 2px;
+    }
+}
+
+.svg-wrapper:hover .shape {
+    -webkit-animation: 0.5s draw linear forwards;
+    animation: 0.5s draw linear forwards;
+}

@@ -1,0 +1,46 @@
+﻿@page "/blog"
+@inject HttpClient Http
+@layout PrimaryLayout
+@using Models
+
+<div class="container fade-up">
+    <h3>Blog</h3>
+</div>
+
+    @if (bs == null)
+    {
+        @*<p><em>Loading...</em></p>*@
+        <p><i class="fa fa-spinner" aria-hidden="true"></i></p>
+    }
+    else
+    {
+        @foreach (var b in bs)
+        {
+            <div class="card col-sm-12 slide-left-animated">
+                <div class="card-header-custom" style="text-align: left;">
+                    <b>@b.Title</b>
+                </div>
+
+                <div class="card-body" style="text-align: left;">
+                    <em>@b.Description</em>
+                    <small>@b.CreatedAt.ToShortDateString()</small>
+                </div>
+
+                <div class="card-footer-custom" style="text-align: left;">
+                    @*<button class="btn btn-primary" type="button" onclick="ReadMore()">More</button>*@
+                    <a href="/article/@b.Id" class="btn btn-danger">Read</a>
+                </div>
+            </div>
+        }
+
+    }
+@*</div>*@
+
+@code {
+    private Blogg[] bs;
+
+    protected override async Task OnInitializedAsync()
+    {
+        bs = await Http.GetFromJsonAsync<Blogg[]>(ApiHelper.apiBlog);
+    }
+}

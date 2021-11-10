@@ -1,0 +1,43 @@
+﻿@page "/news"
+@inject HttpClient Http
+@using Models
+@using Serilog
+
+<h1>News</h1>
+
+@if (news == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Desc</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var n in news)
+            {
+                <tr>
+                    <td>title</td>
+                    <td>desc</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+}
+
+@code {
+    private News[] news;
+
+    protected override async Task OnInitializedAsync()
+    {
+        news = await Http.GetFromJsonAsync<News[]>(ApiHelper.apiNews);
+
+        Log.Information("News loaded");
+    }
+}

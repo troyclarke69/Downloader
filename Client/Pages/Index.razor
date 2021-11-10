@@ -1,0 +1,161 @@
+﻿@page "/"
+@using Serilog
+@inject IJSRuntime JSRuntime
+@inject HttpClient Http
+@using Models
+
+@*<div class="container hello-animated">
+    <h4>Welcome!</h4>
+    <div class="svg-wrapper">
+        <svg height="60" width="320" xmlns="http://www.w3.org/2000/svg">
+            <rect class="shape" height="60" width="320" />
+        </svg>
+
+        <NavLink class="nav-link text" href="projects">
+            View my Portfolio
+        </NavLink>
+    </div>
+</div>*@
+
+    <div class="container">
+        <div class="fade-up">
+            <h2>Welcome!</h2>
+            <h6>My name is Troy Clarke, and I am a web developer.</h6>
+            <p></p>
+        </div>
+
+        <div class="svg-wrapper">
+            <svg height="60" width="320" xmlns="http://www.w3.org/2000/svg">
+                <rect class="shape" height="60" width="320" />
+            </svg>
+
+            <NavLink class="nav-link text" href="projects" style="color: rgb(255,100, 100)">
+                View my Portfolio
+            </NavLink>
+        </div>
+    </div>
+
+@*3 primary options to pass data to Blazor components:
+    Let each component fetch its own state
+    Pass state in via parameters
+    Use cascading values*@
+
+
+@*<a class="nav-link text" href="/projects/:@country_code">
+        View my Portfolio
+    </a>*@
+
+@*<div class="container">
+    <h3>Hello, World!</h3>
+    <p style="color: #a2a2a2;">Welcome to my home page.</p>*@
+
+@*<ul class="colour-list">
+        @for (var i = 0; i < 256; i += 5)
+        {
+            @for (var j = 0; j < 256; j += 50)
+            {
+                @for (var k = 0; k < 256; k += 75)
+                {
+                    <li>
+                        <div class="colour-item">
+                            <div style="background-color: rgba(@i, @j, @k, 1);
+                                                            width: 10px; height: 10px;">
+                            </div>
+                        </div>
+                    </li>
+                }
+            }
+        }
+    </ul>*@
+
+@*@for (int i = 0, j = 0, k = 0; i < 256; i++, j++, k++)
+    {
+        <li>
+            <div class="colour-item">
+                <div style="background-color: rgba(@i, @j, @k, 1);
+                                            width: 10px; height: 10px;">
+                </div>
+            </div>
+        </li>
+    }*@
+
+@*</div>*@
+
+
+
+@*<img src="https://wikishop-bucket.s3.amazonaws.com/resume.jpeg" />*@
+
+@*<div class="row mt-1">
+        <button class="btn btn-primary" @onclick="LogMessage">Log Message</button>
+    </div>*@
+
+@*<button type="button" class="btn btn-primary" @onclick="CallJs">
+        Click Me!
+    </button>*@
+
+@*@if (!string.IsNullOrWhiteSpace(jsText))
+    {
+        <p><span>JavaScript says: @jsText</span></p>
+    }*@
+
+@*<SurveyPrompt Title="How is Blazor working for you?" />*@
+
+@code {
+
+    private Geo geo;
+    private string geoStr;
+    private string country_code;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Http returns: text/html; charset=UTF-8
+        geoStr = await Http.GetStringAsync(ApiHelper.apiGeo);
+        //Log.Information(geoStr);
+
+        // Serialize into JSON string
+        string jsonstr = JsonConvert.SerializeObject(geoStr, Formatting.Indented);
+
+        // Deserialize to the GEO Object
+        Geo deserializedGeo = JsonConvert.DeserializeObject<Geo>(geoStr);
+
+        // VuaLay! We can destructure the result
+        //country_code = deserializedGeo.country_code.ToString();
+        //Log.Information(deserializedGeo.country_code.ToString());
+
+        // update geo.url
+        deserializedGeo.url = "index";
+
+        try
+        {
+            var response = await Http.PostAsJsonAsync(ApiHelper.apiPostTraffic, deserializedGeo);
+            //Log.Information(response.StatusCode.ToString());
+
+            // Why returning 200=OK here, but 201=CREATED in apiSendMail ??
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                Log.Information("Traffic posted successfully. " + deserializedGeo.url);
+            } else
+            {
+                Log.Information("Traffic was not posted." + response.StatusCode);
+            }
+        }
+        catch (Exception e)
+        {
+            Log.Information("Error posting traffic. " + e.Message);
+            return;
+        }
+    }
+
+    private void LogMessage()
+    {
+        Log.Information("Infomation Message");
+    }
+
+    //private string jsText = string.Empty;
+    //private async Task CallJs()
+    //{
+    //    jsText = await JSRuntime.InvokeAsync<string>("ReplyToDotNet");
+    //    // NOTE: "ReplyToDotNet" script is found in index.html
+    //}
+}
+

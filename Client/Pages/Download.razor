@@ -1,0 +1,42 @@
+﻿@page "/download"
+@using System.Net.Http
+@inject HttpClient Http
+
+<table class="table">
+    <tr class="form-group">
+        <td><span class="col-form-label">Youtube URL</span></td>
+        <td><input type="text" class="input-group" @bind="videoRequest.Url" /></td>
+    </tr>
+    <tr class="form-group">
+        <td><span class="col-form-label">Bucket Name</span></td>
+        <td><input type="text" class="input-group" @bind="videoRequest.BucketName" /></td>
+    </tr>
+    <tr class="form-group">
+        <td><span class="col-form-label">Video Title</span></td>
+        <td><input type="text" class="input-group" @bind="videoRequest.VideoTitle" /></td>
+    </tr>
+    <tr class="form-group">
+        <td></td>
+        <td><button class="btn btn-primary" @onclick="DownloadVideo">Download </button></td>
+    </tr>
+    <tr class="form-group">
+        <td></td>
+        <td><h2 class="alert-info">@uploadMsg</h2></td>
+    </tr>
+</table>
+
+@code {
+
+    private VideoRequest videoRequest = new VideoRequest();
+    private string uploadMsg = string.Empty;
+
+    private async Task DownloadVideo()
+    {
+
+        var response = await Http.PostAsJsonAsync("https://9qo8oxukrh.execute-api.us-east-1.amazonaws.com/Prod/downloader", videoRequest);
+        if (response.StatusCode == System.Net.HttpStatusCode.OK)
+        {
+            uploadMsg = "File Successfully uploaded.";
+        }
+    }
+}

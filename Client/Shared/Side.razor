@@ -1,0 +1,60 @@
+﻿@inject HttpClient Http
+<h1>@Title</h1>
+
+@if (projects == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Desc</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var project in projects)
+            {
+                <tr>
+                    <td><a href=@project.Url title="Go to deployed site">@project.Name</a></td>
+                    <td>@project.Description</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    [Parameter]
+    public string Title { get; set; }
+    public int Id { get; set; }
+
+
+    private Project[] projects;
+
+    protected override async Task OnInitializedAsync()
+    {
+        projects = await Http.GetFromJsonAsync<Project[]>(ApiHelper.apiProjects);
+    }
+
+    public class Project
+    {
+        public string Id { get; set; }
+
+        public string Name { get; set; }
+
+        public string Description { get; set; }
+
+        public string Url { get; set; }
+
+        public string Platform { get; set; }
+
+        public string Git { get; set; }
+
+        public string Notes { get; set; }
+
+    }
+}
+
